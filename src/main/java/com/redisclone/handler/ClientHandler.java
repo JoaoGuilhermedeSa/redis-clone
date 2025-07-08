@@ -7,11 +7,15 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.redisclone.model.ObjectType;
 import com.redisclone.model.RedisObject;
 
 public class ClientHandler implements Runnable {
 
+    private static final Logger logger = LoggerFactory.getLogger(ClientHandler.class);
     private final Socket clientSocket;
     private final ConcurrentHashMap<String, RedisObject> dataStore;
 
@@ -63,8 +67,6 @@ public class ClientHandler implements Runnable {
                             } catch (NumberFormatException e) {
                                 out.println("(error) ERR value is not an integer or out of range");
                             }
-                        } else {
-                            out.println("(error) ERR wrong number of arguments for 'setex' command");
                         }
                         break;
                     case "EXPIRE":
@@ -144,7 +146,7 @@ public class ClientHandler implements Runnable {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
     }
 

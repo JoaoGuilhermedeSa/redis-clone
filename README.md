@@ -4,20 +4,19 @@ This project is a simplified clone of Redis built in Java. It supports basic com
 
 ## How to Run
 
-1.  **Prerequisites:** You must have a Java Development Kit (JDK) installed on your system.
+1.  **Prerequisites:**
+    *   Java Development Kit (JDK 23 or later).
+    *   Apache Maven.
 
-2.  **Compilation:** Open a terminal or command prompt and navigate to the `src` directory within the project folder:
+2.  **Build:** Open a terminal or command prompt and navigate to the project's root directory. Run the following Maven command to build the project and create an executable JAR file:
     ```sh
-    cd C:\Users\jpc\poc-workspace\redis-clone\src
+    mvn clean package
     ```
-    Compile the Java source files:
-    ```sh
-    javac com/redisclone/RedisServer.java com/redisclone/ClientHandler.java com/redisclone/RedisObject.java
-    ```
+    This will generate the file `target/redis-clone-0.0.1-SNAPSHOT.jar`.
 
-3.  **Execution:** From the same `src` directory, run the server:
+3.  **Execution:** Run the application from the project's root directory using the following command:
     ```sh
-    java com.redisclone.RedisServer
+    java -jar target/redis-clone-0.0.1-SNAPSHOT.jar
     ```
     The server will start and listen on the default Redis port, `6379`.
 

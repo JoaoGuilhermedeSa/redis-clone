@@ -7,11 +7,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.redisclone.handler.ClientHandler;
 import com.redisclone.model.RedisObject;
 
 public class RedisServer {
 
+    private static final Logger logger = LoggerFactory.getLogger(RedisServer.class);
     private static final int PORT = 6379;
     private static final ConcurrentHashMap<String, RedisObject> dataStore = new ConcurrentHashMap<>();
 
@@ -26,7 +30,8 @@ public class RedisServer {
                 try {
                     Thread.sleep(1000); // Check every second
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    logger.error("Cleaner thread interrupted", e);
+                    Thread.currentThread().interrupt();
                 }
             }
         });
@@ -38,14 +43,14 @@ public class RedisServer {
         ExecutorService executor = Executors.newCachedThreadPool();
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("Redis clone server started on port " + PORT);
+            logger.info("Redis clone server started on port {}", PORT);
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 executor.submit(new ClientHandler(clientSocket, dataStore));
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error starting server", e);
         }
     }
 }
