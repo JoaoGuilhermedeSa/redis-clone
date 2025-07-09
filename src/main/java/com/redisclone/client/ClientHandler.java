@@ -27,6 +27,7 @@ import com.redisclone.event.handler.impl.ListPopRightHandler;
 import com.redisclone.event.handler.impl.ListPushLeftHandler;
 import com.redisclone.event.handler.impl.ListPushRightHandler;
 import com.redisclone.event.handler.impl.ListRangeHandler;
+import com.redisclone.event.handler.impl.PingEventHandler;
 import com.redisclone.event.handler.impl.SetEventHandler;
 import com.redisclone.event.handler.impl.SetExEventHandler;
 import com.redisclone.event.handler.impl.TtlEventHandler;
@@ -56,12 +57,10 @@ public class ClientHandler implements Runnable {
 		this.eventRegistry.put(EventEnum.LRANGE, new ListRangeHandler());
 		this.eventRegistry.put(EventEnum.HSET, new HashSetHandler());
 		this.eventRegistry.put(EventEnum.HGET, new HashGetHandler());
-		this.eventRegistry.put(EventEnum.HSET, new HashSetHandler());
 		this.eventRegistry.put(EventEnum.HGETALL, new HashGetAllHandler());
 		this.eventRegistry.put(EventEnum.HDEL, new HashDelHandler());
-		this.eventRegistry.put(EventEnum.PING, new HashGetAllHandler());
-		this.eventRegistry.put(EventEnum.ECHO, new EchoEventHandler());
-
+		this.eventRegistry.put(EventEnum.PING, new PingEventHandler());
+		this.eventRegistry.put(EventEnum.ECHO, new EchoEventHandler());		
 	}
 
 	@Override
