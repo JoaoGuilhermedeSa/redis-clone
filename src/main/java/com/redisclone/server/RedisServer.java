@@ -10,7 +10,7 @@ import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.redisclone.handler.ClientHandler;
+import com.redisclone.client.ClientHandler;
 import com.redisclone.model.RedisObject;
 
 public class RedisServer {
