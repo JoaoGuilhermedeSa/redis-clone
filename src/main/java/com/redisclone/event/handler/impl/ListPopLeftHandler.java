@@ -4,12 +4,13 @@ import java.io.PrintWriter;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.redisclone.event.handler.EventHandler;
+import com.redisclone.manager.ExpirationManager;
 import com.redisclone.model.ObjectType;
 import com.redisclone.model.RedisObject;
 
 public class ListPopLeftHandler implements EventHandler {
 
-	public void handle(ConcurrentHashMap<String, RedisObject> dataStore, String[] tokens, PrintWriter out) {
+	public void handle(ConcurrentHashMap<String, RedisObject> dataStore, ExpirationManager expManager, String[] tokens, PrintWriter out) {
 		if (tokens.length != 2) {
 			out.println("(error) ERR wrong number of arguments for '" + tokens[0].toLowerCase() + "' command");
 			return;

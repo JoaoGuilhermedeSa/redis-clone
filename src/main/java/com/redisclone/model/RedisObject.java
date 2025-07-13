@@ -14,6 +14,13 @@ public class RedisObject {
     public ObjectType getType() {
         return type;
     }
+    
+    public long getRemainingTTL() {
+        if (expireAt <= 0) return -1;
+        long remaining = expireAt - System.currentTimeMillis();
+        if (remaining <= 0) return -2;
+        return remaining / 1000; // in seconds, as per Redis TTL
+    }
 
     @SuppressWarnings("unchecked")
     public <T> T getValue() {
@@ -29,9 +36,6 @@ public class RedisObject {
     }
 
     public boolean isExpired() {
-        if (expireAt == -1) {
-            return false;
-        }
-        return System.currentTimeMillis() > expireAt;
+        return expireAt > 0 && System.currentTimeMillis() >= expireAt;
     }
 }
