@@ -1,24 +1,22 @@
 package com.redisclone.event.handler.impl;
 
 import java.io.PrintWriter;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.redisclone.event.handler.EventHandler;
-import com.redisclone.manager.ExpirationManager;
 import com.redisclone.model.RedisObject;
+import com.redisclone.service.RedisStoreService;
 
 public class TtlEventHandler implements EventHandler {
 
-	public void handle(ConcurrentHashMap<String, RedisObject> dataStore, ExpirationManager expManager, String[] tokens,
+	public void handle(RedisStoreService redisStoreService, String[] tokens,
 			PrintWriter out) {
 		if (tokens.length == 2) {
 			String key = tokens[1];
-			RedisObject obj = dataStore.get(key);
+			RedisObject obj = redisStoreService.get(key);
 			if (obj == null) {
 				out.println("(integer) -2");
 			} else if (obj.isExpired()) {
-				dataStore.remove(key);
-				expManager.removeExpiry(key);
+				redisStoreService.remove(key);
 				out.println("(integer) -2");
 			} else if (obj.getExpireAt() == -1) {
 				out.println("(integer) -1");

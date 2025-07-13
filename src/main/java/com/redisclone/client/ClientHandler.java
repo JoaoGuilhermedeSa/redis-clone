@@ -8,14 +8,13 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.redisclone.event.handler.EventHandler;
-import com.redisclone.event.handler.impl.DelEventHandler; // New
+import com.redisclone.event.handler.impl.DelEventHandler;
 import com.redisclone.event.handler.impl.EchoEventHandler;
 import com.redisclone.event.handler.impl.ExpireEventHandler;
 import com.redisclone.event.handler.impl.GetEventHandler;
@@ -32,64 +31,61 @@ import com.redisclone.event.handler.impl.PingEventHandler;
 import com.redisclone.event.handler.impl.SetEventHandler;
 import com.redisclone.event.handler.impl.SetExEventHandler;
 import com.redisclone.event.handler.impl.TtlEventHandler;
-import com.redisclone.manager.ExpirationManager;
 import com.redisclone.model.EventEnum;
-import com.redisclone.model.RedisObject;
+import com.redisclone.service.RedisStoreService;
 
 public class ClientHandler implements Runnable {
 
-    private static final Logger logger = LoggerFactory.getLogger(ClientHandler.class);
-    private final Socket clientSocket;
-    private final ConcurrentHashMap<String, RedisObject> dataStore;
-    private final Map<EventEnum, EventHandler> eventRegistry;
-    private final ExpirationManager expManager;
+	private static final Logger logger = LoggerFactory.getLogger(ClientHandler.class);
+	private final Socket clientSocket;
+	private final Map<EventEnum, EventHandler> eventRegistry;
+	private final RedisStoreService redisStoreService;
 
-    public ClientHandler(Socket socket, ConcurrentHashMap<String, RedisObject> dataStore, ExpirationManager expManager) {
-        this.clientSocket = socket;
-        this.dataStore = dataStore;
-        this.expManager = expManager;
-        this.eventRegistry = new HashMap<>();
-        this.eventRegistry.put(EventEnum.SET, new SetEventHandler());
-        this.eventRegistry.put(EventEnum.GET, new GetEventHandler());
-        this.eventRegistry.put(EventEnum.SETEX, new SetExEventHandler());
-        this.eventRegistry.put(EventEnum.EXPIRE, new ExpireEventHandler());
-        this.eventRegistry.put(EventEnum.TTL, new TtlEventHandler());
-        this.eventRegistry.put(EventEnum.LPUSH, new ListPushLeftHandler());
-        this.eventRegistry.put(EventEnum.RPUSH, new ListPushRightHandler());
-        this.eventRegistry.put(EventEnum.LPOP, new ListPopLeftHandler());
-        this.eventRegistry.put(EventEnum.RPOP, new ListPopRightHandler());
-        this.eventRegistry.put(EventEnum.LRANGE, new ListRangeHandler());
-        this.eventRegistry.put(EventEnum.HSET, new HashSetHandler());
-        this.eventRegistry.put(EventEnum.HGET, new HashGetHandler());
-        this.eventRegistry.put(EventEnum.HGETALL, new HashGetAllHandler());
-        this.eventRegistry.put(EventEnum.HDEL, new HashDelHandler());
-        this.eventRegistry.put(EventEnum.PING, new PingEventHandler());
-        this.eventRegistry.put(EventEnum.ECHO, new EchoEventHandler());
-        this.eventRegistry.put(EventEnum.DEL, new DelEventHandler());
-    }
+	public ClientHandler(Socket socket, RedisStoreService redisStoreService) {
+		this.clientSocket = socket;
+		this.redisStoreService = redisStoreService;
+		this.eventRegistry = new HashMap<>();
+		this.eventRegistry.put(EventEnum.SET, new SetEventHandler());
+		this.eventRegistry.put(EventEnum.GET, new GetEventHandler());
+		this.eventRegistry.put(EventEnum.SETEX, new SetExEventHandler());
+		this.eventRegistry.put(EventEnum.EXPIRE, new ExpireEventHandler());
+		this.eventRegistry.put(EventEnum.TTL, new TtlEventHandler());
+		this.eventRegistry.put(EventEnum.LPUSH, new ListPushLeftHandler());
+		this.eventRegistry.put(EventEnum.RPUSH, new ListPushRightHandler());
+		this.eventRegistry.put(EventEnum.LPOP, new ListPopLeftHandler());
+		this.eventRegistry.put(EventEnum.RPOP, new ListPopRightHandler());
+		this.eventRegistry.put(EventEnum.LRANGE, new ListRangeHandler());
+		this.eventRegistry.put(EventEnum.HSET, new HashSetHandler());
+		this.eventRegistry.put(EventEnum.HGET, new HashGetHandler());
+		this.eventRegistry.put(EventEnum.HGETALL, new HashGetAllHandler());
+		this.eventRegistry.put(EventEnum.HDEL, new HashDelHandler());
+		this.eventRegistry.put(EventEnum.PING, new PingEventHandler());
+		this.eventRegistry.put(EventEnum.ECHO, new EchoEventHandler());
+		this.eventRegistry.put(EventEnum.DEL, new DelEventHandler());
+	}
 
-    @Override
-    public void run() {
-        try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
+	@Override
+	public void run() {
+		try (BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+				PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                String[] tokens = inputLine.split("\\s+");
-                String command = tokens[0].toUpperCase();
+			String inputLine;
+			while ((inputLine = in.readLine()) != null) {
+				String[] tokens = inputLine.split("\\s+");
+				String command = tokens[0].toUpperCase();
 
-                Optional<EventEnum> eventOpt = Stream.of(EventEnum.values())
-                        .filter(event -> event.name().equals(command)).findFirst();
+				Optional<EventEnum> eventOpt = Stream.of(EventEnum.values())
+						.filter(event -> event.name().equals(command)).findFirst();
 
-                if (eventOpt.isPresent()) {
-                    this.eventRegistry.get(eventOpt.get()).handle(dataStore, expManager, tokens, out);
-                } else {
-                    out.println("(error) ERR unknown command '" + command + "'");
-                }
+				if (eventOpt.isPresent()) {
+					this.eventRegistry.get(eventOpt.get()).handle(redisStoreService, tokens, out);
+				} else {
+					out.println("(error) ERR unknown command '" + command + "'");
+				}
 
-            }
-        } catch (IOException e) {
-            logger.error(e.getMessage(), e);
-        }
-    }
+			}
+		} catch (IOException e) {
+			logger.error(e.getMessage(), e);
+		}
+	}
 }

@@ -1,22 +1,21 @@
 package com.redisclone.event.handler.impl;
 
 import java.io.PrintWriter;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.redisclone.event.handler.EventHandler;
-import com.redisclone.manager.ExpirationManager;
 import com.redisclone.model.ObjectType;
 import com.redisclone.model.RedisObject;
+import com.redisclone.service.RedisStoreService;
 
 public class HashGetHandler implements EventHandler {
 
-	public void handle(ConcurrentHashMap<String, RedisObject> dataStore, ExpirationManager expManager, String[] tokens,
+	public void handle(RedisStoreService redisStoreService, String[] tokens,
 			PrintWriter out) {
 		if (tokens.length != 3) {
 			out.println("(error) ERR wrong number of arguments for 'hget' command");
 			return;
 		}
-		RedisObject obj = dataStore.get(tokens[1]);
+		RedisObject obj = redisStoreService.get(tokens[1]);
 		if (obj == null) {
 			out.println("(nil)");
 			return;
