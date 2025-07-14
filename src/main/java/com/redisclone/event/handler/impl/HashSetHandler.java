@@ -2,22 +2,21 @@ package com.redisclone.event.handler.impl;
 
 import java.io.PrintWriter;
 
-import com.redisclone.event.handler.EventHandler;
+import com.redisclone.event.handler.AbstractEventHandler;
 import com.redisclone.model.ObjectType;
 import com.redisclone.model.RedisObject;
 import com.redisclone.service.RedisStoreService;
 
-public class HashSetHandler implements EventHandler {
+public class HashSetHandler extends AbstractEventHandler {
 
-	public void handle(RedisStoreService redisStoreService, String[] tokens,
-			PrintWriter out) {
+	public void handle(RedisStoreService redisStoreService, String[] tokens, PrintWriter out) {
 		if (tokens.length < 4 || tokens.length % 2 != 0) {
-			out.println("(error) ERR wrong number of arguments for 'hset' command");
+			sendError(out, "ERR wrong number of arguments for 'hset' command");
 			return;
 		}
 		RedisObject obj = redisStoreService.get(tokens[1]);
 		if (obj != null && obj.getType() != ObjectType.HASH) {
-			out.println("(error) WRONGTYPE Operation against a key holding the wrong kind of value");
+			sendError(out, "WRONGTYPE Operation against a key holding the wrong kind of value");
 			return;
 		}
 		if (obj == null) {
@@ -31,7 +30,7 @@ public class HashSetHandler implements EventHandler {
 				newFields++;
 			}
 		}
-		out.println("(integer) " + newFields);
+		sendSimpleInteger(out, newFields);
 	}
 
 }

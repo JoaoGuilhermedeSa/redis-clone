@@ -2,15 +2,15 @@ package com.redisclone.event.handler.impl;
 
 import java.io.PrintWriter;
 
-import com.redisclone.event.handler.EventHandler;
+import com.redisclone.event.handler.AbstractEventHandler;
 import com.redisclone.service.RedisStoreService;
 
-public class DelEventHandler implements EventHandler {
+public class DelEventHandler extends AbstractEventHandler {
 
     @Override
     public void handle(RedisStoreService redisStoreService, String[] tokens, PrintWriter out) {
         if (tokens.length < 2) {
-            out.println("(error) wrong number of arguments for 'del' command");
+            sendError(out, "ERR wrong number of arguments for 'get' command");
             return;
         }
         int deleted = 0;

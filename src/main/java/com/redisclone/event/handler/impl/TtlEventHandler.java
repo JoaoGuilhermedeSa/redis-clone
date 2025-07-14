@@ -2,11 +2,11 @@ package com.redisclone.event.handler.impl;
 
 import java.io.PrintWriter;
 
-import com.redisclone.event.handler.EventHandler;
+import com.redisclone.event.handler.AbstractEventHandler;
 import com.redisclone.model.RedisObject;
 import com.redisclone.service.RedisStoreService;
 
-public class TtlEventHandler implements EventHandler {
+public class TtlEventHandler extends AbstractEventHandler {
 
 	public void handle(RedisStoreService redisStoreService, String[] tokens,
 			PrintWriter out) {
@@ -14,18 +14,18 @@ public class TtlEventHandler implements EventHandler {
 			String key = tokens[1];
 			RedisObject obj = redisStoreService.get(key);
 			if (obj == null) {
-				out.println("(integer) -2");
+				sendSimpleInteger(out, -2);
 			} else if (obj.isExpired()) {
 				redisStoreService.remove(key);
-				out.println("(integer) -2");
+				sendSimpleInteger(out, -2);
 			} else if (obj.getExpireAt() == -1) {
-				out.println("(integer) -1");
+				sendSimpleInteger(out, -1);
 			} else {
 				long ttl = (obj.getExpireAt() - System.currentTimeMillis()) / 1000;
-				out.println("(integer) " + ttl);
+				sendSimpleInteger(out, -1);
 			}
 		} else {
-			out.println("(error) ERR wrong number of arguments for 'ttl' command");
+			sendError(out, "ERR wrong number of arguments for 'ttl' command");
 		}
 	}
 

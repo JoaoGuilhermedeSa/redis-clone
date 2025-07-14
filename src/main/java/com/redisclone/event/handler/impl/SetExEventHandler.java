@@ -2,12 +2,12 @@ package com.redisclone.event.handler.impl;
 
 import java.io.PrintWriter;
 
-import com.redisclone.event.handler.EventHandler;
+import com.redisclone.event.handler.AbstractEventHandler;
 import com.redisclone.model.ObjectType;
 import com.redisclone.model.RedisObject;
 import com.redisclone.service.RedisStoreService;
 
-public class SetExEventHandler implements EventHandler {
+public class SetExEventHandler extends AbstractEventHandler {
 
 	public void handle(RedisStoreService redisStoreService, String[] tokens, PrintWriter out) {
 		if (tokens.length == 4) {
@@ -17,7 +17,7 @@ public class SetExEventHandler implements EventHandler {
 				obj.setExpireAt(System.currentTimeMillis() + (seconds * 1000));
 				redisStoreService.updateExpiry(tokens[1], (seconds * 1000));
 				redisStoreService.put(tokens[1], obj);
-				out.println("OK");
+				sendSimpleString(out, "OK");
 			} catch (NumberFormatException e) {
 				out.println("(error) ERR value is not an integer or out of range");
 			}

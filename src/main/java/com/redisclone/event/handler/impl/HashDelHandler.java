@@ -2,12 +2,12 @@ package com.redisclone.event.handler.impl;
 
 import java.io.PrintWriter;
 
-import com.redisclone.event.handler.EventHandler;
+import com.redisclone.event.handler.AbstractEventHandler;
 import com.redisclone.model.ObjectType;
 import com.redisclone.model.RedisObject;
 import com.redisclone.service.RedisStoreService;
 
-public class HashDelHandler implements EventHandler {
+public class HashDelHandler extends AbstractEventHandler {
 
 	public void handle(RedisStoreService redisStoreService, String[] tokens, PrintWriter out) {
 		if (tokens.length < 3) {

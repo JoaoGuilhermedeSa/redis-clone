@@ -2,26 +2,26 @@ package com.redisclone.event.handler.impl;
 
 import java.io.PrintWriter;
 
-import com.redisclone.event.handler.EventHandler;
+import com.redisclone.event.handler.AbstractEventHandler;
 import com.redisclone.model.ObjectType;
 import com.redisclone.model.RedisObject;
 import com.redisclone.service.RedisStoreService;
 
-public class ListRangeHandler implements EventHandler {
+public class ListRangeHandler extends AbstractEventHandler {
 
 	public void handle(RedisStoreService redisStoreService, String[] tokens,
 			PrintWriter out) {
 		if (tokens.length != 4) {
-			out.println("(error) ERR wrong number of arguments for 'lrange' command");
+			sendError(out, "ERR wrong number of arguments for 'lrange' command");
 			return;
 		}
 		RedisObject obj = redisStoreService.get(tokens[1]);
 		if (obj == null) {
-			out.println("(empty list or set)");
+			sendEmptyArray(out);
 			return;
 		}
 		if (obj.getType() != ObjectType.LIST) {
-			out.println("(error) WRONGTYPE Operation against a key holding the wrong kind of value");
+			sendError(out, "WRONGTYPE Operation against a key holding the wrong kind of value");
 			return;
 		}
 		java.util.List<String> list = obj.getValue();
@@ -38,7 +38,7 @@ public class ListRangeHandler implements EventHandler {
 				end = list.size() - 1;
 
 			if (start > end) {
-				out.println("(empty list or set)");
+				sendEmptyArray(out);
 				return;
 			}
 
@@ -46,7 +46,7 @@ public class ListRangeHandler implements EventHandler {
 				out.println((i - start + 1) + ") \"" + list.get(i) + "\"");
 			}
 		} catch (NumberFormatException e) {
-			out.println("(error) ERR value is not an integer or out of range");
+			sendError(out, "ERR value is not an integer or out of range");
 		}
 	}
 
